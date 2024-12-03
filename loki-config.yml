@@ -1,0 +1,85 @@
+---
+server:
+  http_listen_address: 0.0.0.0
+  http_listen_port: 3100
+
+memberlist:
+  join_members: ["read", "write", "backend"]
+  dead_node_reclaim_time: 30s
+  gossip_to_dead_nodes_time: 15s
+  left_ingesters_timeout: 30s
+  bind_addr: ['0.0.0.0']
+  bind_port: 7946
+  gossip_interval: 2s
+
+ingester:
+  chunk_encoding: snappy
+  chunk_idle_period: 1m
+  chunk_retain_period: 20s
+  max_chunk_age: 2m
+
+schema_config:
+  configs:
+    - from: 2023-01-01
+      store: tsdb
+      object_store: loki_data1
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+    - from: 2024-10-25
+      store: tsdb
+      object_store: loki_data2
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  compactor_address: http://backend:3100
+  # storage:
+  #   s3:
+  #     endpoint: minio:9000
+  #     insecure: true
+  #     bucketnames: loki-data
+  #     access_key_id: loki
+  #     secret_access_key: supersecret
+  #     s3forcepathstyle: true
+  #     http_config:
+  #       timeout: 1m
+  ring:
+    kvstore:
+      store: memberlist
+
+storage_config:
+  named_stores:
+    aws:
+      loki_data1:
+        endpoint: minio:9000
+        insecure: true
+        bucketnames: loki-data
+        access_key_id: loki
+        secret_access_key: supersecret
+        s3forcepathstyle: true
+        http_config:
+          timeout: 1m
+
+      loki_data2:
+        s3forcepathstyle: true
+        bucketnames: loki-data2
+        endpoint: minio:9000
+        insecure: true
+        access_key_id: loki
+        secret_access_key: supersecret
+        http_config:
+          timeout: 1m
+
+ruler:
+  storage:
+    s3:
+      bucketnames: loki-ruler
+
+compactor:
+  working_directory: /tmp/compactor

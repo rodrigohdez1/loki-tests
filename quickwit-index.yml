@@ -1,0 +1,30 @@
+#
+# Index config file for stackoverflow dataset.
+#
+version: 0.7
+
+index_id: index-name
+
+doc_mapping:
+  field_mappings:
+    - name: host
+      type: text
+      tokenizer: default
+      record: position
+      stored: true
+    - name: timestamp
+      type: datetime
+      fast: true
+      input_formats:
+        - iso8601
+        - rfc2822
+        - rfc3339
+        - unix_timestamp
+      fast_precision: nanoseconds
+  timestamp_field: timestamp
+
+search_settings:
+  default_search_fields: [host]
+
+indexing_settings:
+  commit_timeout_secs: 30
